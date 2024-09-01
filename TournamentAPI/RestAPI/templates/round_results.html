@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Round {{ round_number }} Results</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.js"></script>
+</head>
+<body class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header">
+            <h1 class="mb-0">Round {{ round_number }} Results</h1>
+        </div>
+        <div class="card-body">
+            <form method="get" action="{% url 'round_results' %}" class="form-inline mb-4">
+                <div class="form-group mr-3">
+                    <label for="round" class="mr-2">Select Round:</label>
+                    <select name="round" id="round" class="form-control">
+                        {% for i in rounds %}
+                            <option value="{{ i }}" {% if i == round_number %}selected{% endif %}>Round {{ i }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">View Results</button>
+            </form>
+
+            {% if round_games %}
+                <table id="resultsTable" class="table table-hover display">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Board</th>
+                            <th scope="col">Player 1</th>
+                            <th scope="col">Player 2</th>
+                            <th scope="col">Result</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for game in round_games %}
+                            <tr>
+                                <td>{{ game.board }}</td>
+                                <td>{{ game.player1.base.name }}</td>
+                                <td>{{ game.player2.base.name }}</td>
+                                <td>
+                                    {% if game.result == 1 %}
+                                        <span class="text-success">Player 1 Won</span>
+                                    {% elif game.result == -1 %}
+                                        <span class="text-danger">Player 2 Won</span>
+                                    {% elif game.result == 0 %}
+                                        <span class="text-primary">Draw</span>
+                                    {% elif game.result == 2 %}
+                                        <span class="text-success">Player 1 Won by Forfeit</span>
+                                    {% elif game.result == -2 %}
+                                        <span class="text-danger">Player 2 Won by Forfeit</span>
+                                    {% else %}
+                                        Unknown Result
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-warning" role="alert">
+                    No games found for round {{ round_number }}.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Initialize DataTables -->
+    <script>
+        $(document).ready(function() {
+            $('#resultsTable').DataTable({
+                "paging": false,        // Disable pagination (optional)
+                "info": false,          // Disable table information display (optional)
+                "order": [[0, "asc"]]   // Default sort by the first column (board number)
+            });
+        });
+    </script>
+</body>
+</html>
